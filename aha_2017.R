@@ -1,0 +1,598 @@
+
+
+# Loading Packages
+
+library(rvest)
+library(purrr)
+library(jsonlite)
+
+
+## Session Title Function
+session_titles <- function(html_link){
+  html <- read_html(html_link)
+  session_title <- html |>
+    html_elements(css = ".subtitle") |>
+    html_text() |>
+    stringr::str_replace_all("\n|\t", "")
+  return(session_title)
+}
+
+## Paper Title Function
+paper_titles <- function(html_link){
+  html <- read_html(html_link)
+  result <- html |>
+    html_elements(css = ".persontitle a") |>
+    html_text() |>
+    stringr::str_replace_all("\n|\t|\r", "")
+
+  return(result)
+}
+
+
+
+#Institutions
+institutions <- function(html_link){
+  html <- read_html(html_link)
+  result <- html |>
+    html_elements(css = ".affiliation") |>
+    html_text() |>
+    stringr::str_replace_all("\n|\t|\r", "")
+  return(result)
+}
+
+
+
+
+## Vectors of Links
+
+day1_paper_2017 <- c("https://aha.confex.com/aha/2017/webprogram/Session15462.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15229.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14195.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14303.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14458.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14560.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14588.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14614.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14724.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14748.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14760.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14790.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14837.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14886.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14887.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15043.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15048.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15051.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15092.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15103.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15161.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15203.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15213.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14961.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15273.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15274.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15275.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14671.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14970.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15471.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14172.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14221.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14511.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14551.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14621.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14737.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14781.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14842.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14878.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14964.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14974.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15020.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15045.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15047.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15152.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15199.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15457.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15309.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14520.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14592.html")
+
+
+day1_panel_2017<- c("https://aha.confex.com/aha/2017/webprogram/Session15618.html",
+                    "https://aha.confex.com/aha/2017/webprogram/Session15271.html",
+                    "https://aha.confex.com/aha/2017/webprogram/Session15044.html",
+                    "https://aha.confex.com/aha/2017/webprogram/Session14922.html",
+                    "https://aha.confex.com/aha/2017/webprogram/Session15207.html",
+                    "https://aha.confex.com/aha/2017/webprogram/Session15470.html",
+                    "https://aha.confex.com/aha/2017/webprogram/Session15330.html",
+                    "https://aha.confex.com/aha/2017/webprogram/Session15241.html",
+                    "https://aha.confex.com/aha/2017/webprogram/Session15083.html",
+                    "https://aha.confex.com/aha/2017/webprogram/Session15233.html",
+                    "https://aha.confex.com/aha/2017/webprogram/Session14494.html",
+                    "https://aha.confex.com/aha/2017/webprogram/Session14727.html",
+                    "https://aha.confex.com/aha/2017/webprogram/Session14810.html",
+                    "https://aha.confex.com/aha/2017/webprogram/Session14927.html",
+                    "https://aha.confex.com/aha/2017/webprogram/Session15188.html",
+                    "https://aha.confex.com/aha/2017/webprogram/Session15029.html",
+                    "https://aha.confex.com/aha/2017/webprogram/Session15015.html",
+                    "https://aha.confex.com/aha/2017/webprogram/Session15217.html",
+                    "https://aha.confex.com/aha/2017/webprogram/Session15208.html",
+                    "https://aha.confex.com/aha/2017/webprogram/Session15278.html",
+                    "https://aha.confex.com/aha/2017/webprogram/Session15312.html",
+                    "https://aha.confex.com/aha/2017/webprogram/Session15414.html",
+                    "https://aha.confex.com/aha/2017/webprogram/Session15538.html")
+
+
+day2_paper_2017 <- c("https://aha.confex.com/aha/2017/webprogram/Session15463.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15401.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15244.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14371.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14651.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14736.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14885.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14891.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14937.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14951.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14958.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14965.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14979.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15003.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15017.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15107.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15114.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15145.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15168.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15204.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15316.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15350.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15358.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15288.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15290.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15291.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14533.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15059.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15254.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15472.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15599.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14184.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14249.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14330.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14491.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14652.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14659.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14721.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14796.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14800.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15080.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14943.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14945.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15117.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15126.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15128.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15131.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15202.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15206.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15200.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15328.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15335.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15351.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15292.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15301.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15308.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15314.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15251.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15262.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15061.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15066.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15453.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15255.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15344.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15476.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15336.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15464.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14428.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14512.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14700.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14812.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14859.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14904.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14966.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14969.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15008.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15030.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15057.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15060.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15156.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15172.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15176.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15219.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14806.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15210.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15201.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15348.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15349.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15360.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15298.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15299.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15300.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15327.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15375.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15380.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15263.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15268.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15326.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15393.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15256.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15333.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15466.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14174.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14247.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14253.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14574.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14791.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14833.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14867.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14879.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14880.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14925.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14980.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15035.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15049.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15154.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15222.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14801.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15211.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15329.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15354.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15302.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15303.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15317.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15318.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15410.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15384.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15385.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15400.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15257.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15391.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15398.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15404.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15412.html")
+
+
+
+
+day2_panel_2017 <- c("https://aha.confex.com/aha/2017/webprogram/Session15235.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15615.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14915.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15000.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15007.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15010.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15028.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15104.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14708.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15454.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15236.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15395.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14505.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14627.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15205.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15218.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14369.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15397.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15281.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15431.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15282.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15230.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15593.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15600.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14542.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14768.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15023.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15185.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14903.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15357.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15295.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15403.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15240.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15232.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15270.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15589.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14540.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14591.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14734.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14975.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15215.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15337.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15617.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15239.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15392.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15406.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15409.html")
+
+day3_paper_2017 <- c("https://aha.confex.com/aha/2017/webprogram/Session15596.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14260.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14378.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14672.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14776.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14780.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14808.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14838.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14865.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14883.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14936.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15056.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15087.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15089.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15122.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15134.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15169.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15209.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15096.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15315.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15352.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15355.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15359.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15387.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15396.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15399.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15433.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14710.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14850.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15258.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15473.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15140.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14466.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14594.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14635.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14792.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14888.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14899.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14935.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14939.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14971.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14983.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15025.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15036.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15064.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15071.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15078.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15105.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15160.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14723.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15197.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15319.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15320.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15361.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15416.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15419.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15421.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15424.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15376.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14988.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15012.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15259.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15605.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15556.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15243.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15458.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15606.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15467.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14638.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14730.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14918.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14931.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14949.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14963.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14978.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14994.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14996.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14998.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15004.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15018.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15019.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15073.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15098.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15125.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15171.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15220.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14640.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15426.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15427.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15428.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15383.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14881.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15121.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15586.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15266.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14795.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14478.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14474.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14754.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14854.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14890.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14921.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14973.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14982.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15021.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15027.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15032.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15079.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15142.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15150.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14699.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15322.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15323.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15356.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15430.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15432.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15437.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15415.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15039.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15167.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15459.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15343.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15607.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15234.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15423.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15425.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15444.html")
+
+
+day3_panel_2017 <- c("https://aha.confex.com/aha/2017/webprogram/Session15237.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15594.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14493.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14477.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14477.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15077.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15216.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15225.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15436.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15405.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15238.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15065.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15269.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14593.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14613.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14799.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15189.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15214.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15362.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15249.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15449.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15231.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14629.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14455.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14459.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14953.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15224.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15574.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15429.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15306.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15260.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15595.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14626.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15598.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15420.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14956.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15133.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15178.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15190.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15435.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15334.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15411.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15261.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15418.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15434.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15686.html")
+
+day4_paper_2017 <- c("https://aha.confex.com/aha/2017/webprogram/Session14997.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15177.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14476.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14562.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14576.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14598.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14605.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14622.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14649.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14691.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14924.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14928.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15002.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15033.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15050.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15068.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15074.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15081.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15129.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15198.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15304.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15450.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15451.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15386.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15267.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14563.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14565.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14620.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14811.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14912.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14972.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14977.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14993.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14995.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15001.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15099.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15108.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15112.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15118.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15119.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15120.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15127.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15135.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15452.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15307.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15388.html")
+
+
+day4_panel_2017 <- c("https://aha.confex.com/aha/2017/webprogram/Session15591.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15597.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14930.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14938.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15139.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15212.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15408.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15631.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14523.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session14797.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15601.html",
+                     "https://aha.confex.com/aha/2017/webprogram/Session15221.html")
+
+
+
+## Combing Links
+
+paper_2017 <- c(day1_paper_2017, day2_paper_2017, day3_paper_2017, day4_paper_2017)
+
+panel_2017 <- c(day1_panel_2017, day2_panel_2017, day3_panel_2017, day4_panel_2017)
+
+links_2017 <- c(paper_2017, panel_2017)
+
+## Mapping Functions
+
+panelsessionTitles_2017 <- purrr::map(panel_2017, session_titles)
+
+papersessionTitles_2017 <- purrr::map(paper_2017, session_titles)
+
+paperTitles_2017 <- purrr::map(paper_2017, paper_titles)
+
+institutionsPaper_2017 <- purrr::map(paper_2017, institutions)
+
+institutionPanel_2017 <- purrr::map(panel_2017, institutions)
+
+## List
+
+aha_2017_paper <- list(session_titles = papersessionTitles_2017,
+                     paper_titles = paperTitles_2017,
+                     paper_institutions = institutionsPaper_2017)
+
+
+aha_2017_panel <- list(session_titles = panelsessionTitles_2017,
+                     panel_institutions = institutionPanel_2017)
+
+## JSON Files
+
+library(jsonlite)
+
+file_2017_paper = toJSON(aha_2017_paper, pretty = TRUE, auto_unbox = TRUE)
+
+write(file_2017_paper, "aha2017_paper.json")
+
+file_2017_panel = toJSON(aha_2017_panel, pretty = TRUE, auto_unbox = TRUE)
+
+write(file_2017_panel, "aha2017_panel.json")
+
+
+
+
+
+
+
+
